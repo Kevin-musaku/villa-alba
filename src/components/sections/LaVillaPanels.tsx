@@ -40,7 +40,7 @@ function Panel({
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true, margin: "-15%" }}
         transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-        className={`relative aspect-[6/5] w-full overflow-hidden rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] [direction:ltr] ${
+        className={`relative aspect-square w-full overflow-hidden rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] [direction:ltr] ${
           reverse ? "md:mb-10" : "md:mt-10"
         }`}
       >
@@ -48,7 +48,7 @@ function Panel({
           src={image.src}
           alt={image.alt}
           fill
-          sizes="(min-width: 768px) 48vw, 100vw"
+          sizes="(min-width: 768px) 50vw, 100vw"
           className="object-cover transition-transform duration-700 hover:scale-105"
         />
       </motion.div>

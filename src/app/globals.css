@@ -1,27 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  /* Cool, modern light-neutral palette (slate/zinc family) — swapped from
-     the previous warm beige tones for a crisper, more contemporary look
-     while staying bright/light (no dark mode). */
-  --color-ink: #14171c;
-  --color-charcoal: #2b3038;
-  --color-graphite: #545b66;
-  --color-stone: #8992a0;
-  --color-mist: #dde1e7;
-  --color-fog: #eef1f4;
-  --color-paper: #f7f8fa;
+  /* Pure neutral grayscale palette — every value below has R=G=B, no warm
+     or cool tint at all, per explicit request. Light/bright throughout
+     (no dark mode), just varying shades of true gray. */
+  --color-ink: #171717;
+  --color-charcoal: #2e2e2e;
+  --color-graphite: #595959;
+  --color-stone: #8c8c8c;
+  --color-mist: #d6d6d6;
+  --color-fog: #ececec;
+  --color-paper: #f7f7f7;
   --color-white: #ffffff;
-  --color-silver: #b6bcc6;
-  --color-line: rgba(20, 23, 28, 0.14);
+  --color-silver: #b8b8b8;
+  --color-line: rgba(23, 23, 23, 0.14);
 
-  /* Distinct, modern, elegant light section backgrounds — each site
-     section gets a genuinely different tone (not just --color-paper
-     everywhere) so the palette actually reads as varied while scrolling. */
-  --color-panel-sand: #f4f0e9;
-  --color-panel-sage: #eef2ee;
-  --color-panel-mauve: #f2eef1;
-  --color-panel-slate: #eef0f3;
+  /* Distinct light-gray section backgrounds — each site section gets a
+     genuinely different shade of true gray (not --color-paper everywhere)
+     so the palette reads as varied while scrolling, while staying strictly
+     grayscale — no sand/sage/mauve tint like the previous version. */
+  --color-panel-sand: #f5f5f5;
+  --color-panel-sage: #eeeeee;
+  --color-panel-mauve: #e2e2e2;
+  --color-panel-slate: #d6d6d6;
 
   --radius-xs: 6px;
   --radius-sm: 8px;
@@ -68,12 +69,11 @@ body {
   font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
 }
 
-/* Dark/desaturated photo treatment — reserved for the hero image only (the
-   backdrop behind the "Villa Alba" title). Every other photo on the site
-   (rooms, gallery, wines) shows true color, no filter, so real photography
-   reads bright and inviting once the owner uploads it. */
+/* Very light desaturation — reserved for the hero image only (the backdrop
+   behind the "Villa Alba" title). Every other photo on the site (rooms,
+   gallery, wines, activities) shows true, full color. */
 .monochrome {
-  filter: grayscale(55%) saturate(0.82) contrast(1.05) brightness(0.92);
+  filter: grayscale(30%) contrast(1.03) brightness(0.97);
   transition: transform 0.6s var(--ease);
 }
 .photo-frame:hover .monochrome {

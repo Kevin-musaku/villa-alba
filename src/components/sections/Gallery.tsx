@@ -62,7 +62,7 @@ export function Gallery({ items }: { items?: GalleryItem[] }) {
                       whileInView={{ opacity: 1, scale: 1 }}
                       viewport={{ once: true, margin: "-10%" }}
                       transition={{ duration: 0.5 }}
-                      className="relative aspect-[4/3] w-full overflow-hidden rounded-[var(--radius-md)] shadow-[var(--shadow-sm)]"
+                      className="relative aspect-square w-full overflow-hidden rounded-[var(--radius-md)] shadow-[var(--shadow-sm)]"
                     >
                       <Image
                         src={item.image.src}
