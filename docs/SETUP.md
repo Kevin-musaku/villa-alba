@@ -154,3 +154,45 @@ richiesta rispetto a quanto già impostato):
 3. Deploy. Il Cron Job per Smoobu si attiva automaticamente.
 4. Aggiorna l'URL del webhook Stripe (punto 2.3) con il dominio definitivo
    una volta noto.
+
+## 9. Sincronizzazione Smoobu ogni 2 minuti (oltre al cron giornaliero)
+
+Il piano Vercel Hobby limita il proprio Cron Job (`vercel.json`) a una
+volta al giorno. La migration `0007_smoobu_sync_cron.sql` aggiunge una
+sincronizzazione molto più frequente (ogni 2 minuti) usando `pg_cron` +
+`pg_net` dentro Supabase — gratuito su ogni piano, nessun servizio esterno.
+Il cron giornaliero di Vercel resta comunque attivo come rete di sicurezza.
+
+Passaggi manuali una tantum, da fare dopo il primo deploy:
+
+1. **Genera un secret casuale** (es. `openssl rand -hex 32`) e impostalo
+   su Vercel come variabile d'ambiente `CRON_SECRET`. Da quel momento
+   `/api/smoobu/sync` richiede l'header `Authorization: Bearer <CRON_SECRET>`
+   — Vercel lo aggiunge da solo alle chiamate del proprio cron, ma pg_cron
+   deve riceverlo esplicitamente (punto 3).
+2. Applica la migration `0007_smoobu_sync_cron.sql` (stesso procedimento
+   usato per le altre, es. `psql` sulla connection string del pooler).
+3. Nello SQL editor di Supabase, esegui (sostituendo i due placeholder):
+
+   ```sql
+   select vault.create_secret('https://IL-TUO-DOMINIO/api/smoobu/sync', 'smoobu_sync_url');
+   select vault.create_secret('LO-STESSO-VALORE-DI-CRON_SECRET-SU-VERCEL', 'smoobu_sync_cron_secret');
+   ```
+
+4. Verifica che giri controllando `select * from cron.job_run_details
+   order by start_time desc limit 5;` dopo qualche minuto.
+5. **Quando colleghi il dominio definitivo**, aggiorna solo il primo
+   secret (nessun redeploy del sito necessario, è un dato nel database):
+
+   ```sql
+   select vault.update_secret(
+     (select id from vault.secrets where name = 'smoobu_sync_url'),
+     'https://IL-NUOVO-DOMINIO/api/smoobu/sync'
+   );
+   ```
+
+Nota: passare da 1 a ~720 chiamate/giorno verso l'API di Smoobu potrebbe
+avvicinare eventuali limiti di rate-limit del vostro piano Smoobu — se nei
+log compaiono errori 429, allarga l'intervallo modificando `'*/2 * * * *'`
+nella migration (o rischedulando il job via SQL editor senza una nuova
+migration: `select cron.alter_job(job_id, schedule := '*/5 * * * *')`).

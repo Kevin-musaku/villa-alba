@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripeClient } from "@/lib/stripe/client";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
-import { pushBookingToSmoobu } from "@/lib/smoobu/pushBooking";
+import { pushBookingToSmoobu, cancelSmoobuReservation } from "@/lib/smoobu/pushBooking";
 import { sendBookingConfirmationEmail } from "@/lib/email";
 import type Stripe from "stripe";
 import type { BookingRow } from "@/lib/supabase/types";
@@ -45,10 +45,15 @@ export async function POST(req: NextRequest) {
       if (error) {
         console.error("[stripe/webhook] errore aggiornamento prenotazione", error.message);
       } else if (booking) {
-        try {
-          await pushBookingToSmoobu(booking as BookingRow);
-        } catch (err) {
-          console.error("[stripe/webhook] errore invio a Smoobu (non bloccante)", err);
+        // La prenotazione è già stata inviata a Smoobu al momento del
+        // checkout (per bloccare subito il calendario sugli altri canali).
+        // Riprova qui solo se quell'invio non è riuscito.
+        if ((booking as BookingRow).smoobu_push_status !== "pushed") {
+          try {
+            await pushBookingToSmoobu(booking as BookingRow);
+          } catch (err) {
+            console.error("[stripe/webhook] errore invio a Smoobu (non bloccante)", err);
+          }
         }
         try {
           await sendBookingConfirmationEmail(booking as BookingRow);
@@ -63,11 +68,21 @@ export async function POST(req: NextRequest) {
     const session = event.data.object as Stripe.Checkout.Session;
     const bookingId = session.metadata?.booking_id;
     if (bookingId) {
-      await supabase
+      const { data: cancelled } = await supabase
         .from("bookings")
         .update({ status: "cancelled" })
         .eq("id", bookingId)
-        .eq("status", "pending");
+        .eq("status", "pending")
+        .select("smoobu_reservation_id")
+        .single();
+
+      if (cancelled?.smoobu_reservation_id) {
+        try {
+          await cancelSmoobuReservation(cancelled.smoobu_reservation_id);
+        } catch (err) {
+          console.error("[stripe/webhook] errore annullamento su Smoobu (non bloccante)", err);
+        }
+      }
     }
   }
 

@@ -7,10 +7,12 @@ import {
   endOfMonth,
   format,
   getDay,
+  isBefore,
   startOfMonth,
 } from "date-fns";
+import { it } from "date-fns/locale";
+import { ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 
-type Override = { date: string; price_cents: number; note: string | null };
 type Settings = {
   base_price_cents: number;
   min_stay_nights: number;
@@ -19,14 +21,26 @@ type Settings = {
 };
 
 const WEEKDAY_LABELS = ["L", "M", "M", "G", "V", "S", "D"];
-const MONTHS_AHEAD = 6;
+const MONTHS_AHEAD = 24;
+
+type SyncOutcome = { ok: boolean; synced?: number; error?: string };
+
+function formatEuro(cents: number) {
+  return (cents / 100).toFixed(2).replace(".", ",");
+}
 
 export function PricingCalendarManager() {
+  const today = useMemo(() => startOfMonth(new Date()), []);
+  const maxMonth = useMemo(() => addMonths(today, MONTHS_AHEAD), [today]);
+  const monthOptions = useMemo(
+    () => Array.from({ length: MONTHS_AHEAD + 1 }, (_, i) => addMonths(today, i)),
+    [today]
+  );
+
+  const [viewMonth, setViewMonth] = useState(today);
   const [overrides, setOverrides] = useState<Map<string, number>>(new Map());
   const [smoobuRates, setSmoobuRates] = useState<Map<string, number>>(new Map());
   const [settings, setSettings] = useState<Settings | null>(null);
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [priceInput, setPriceInput] = useState("");
   const [loading, setLoading] = useState(true);
   const [baseForm, setBaseForm] = useState({
     basePriceEuros: "",
@@ -35,6 +49,17 @@ export function PricingCalendarManager() {
     touristTaxEuros: "",
   });
   const [error, setError] = useState<string | null>(null);
+
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [manualEnabled, setManualEnabled] = useState(false);
+  const [manualPriceInput, setManualPriceInput] = useState("");
+  const [savingDate, setSavingDate] = useState(false);
+
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<{
+    availability: SyncOutcome;
+    rates: SyncOutcome;
+  } | null>(null);
 
   async function withErrorHandling(fn: () => Promise<Response>) {
     setError(null);
@@ -52,24 +77,15 @@ export function PricingCalendarManager() {
     }
   }
 
-  const firstMonth = startOfMonth(new Date());
-  const months = useMemo(
-    () => Array.from({ length: MONTHS_AHEAD }, (_, i) => addMonths(firstMonth, i)),
-    [firstMonth]
-  );
-
-  async function load() {
+  async function loadMonth(month: Date) {
     setLoading(true);
-    const from = format(firstMonth, "yyyy-MM-dd");
-    const to = format(endOfMonth(addMonths(firstMonth, MONTHS_AHEAD - 1)), "yyyy-MM-dd");
+    const from = format(startOfMonth(month), "yyyy-MM-dd");
+    const to = format(endOfMonth(month), "yyyy-MM-dd");
 
-    const [pricingRes, settingsRes] = await Promise.all([
-      fetch(`/api/admin/pricing?from=${from}&to=${to}`).then((r) => r.json()),
-      fetch("/api/admin/settings").then((r) => r.json()),
-    ]);
+    const pricingRes = await fetch(`/api/admin/pricing?from=${from}&to=${to}`).then((r) => r.json());
 
     const map = new Map<string, number>();
-    for (const o of (pricingRes.overrides ?? []) as Override[]) {
+    for (const o of (pricingRes.overrides ?? []) as { date: string; price_cents: number }[]) {
       map.set(o.date, o.price_cents);
     }
     setOverrides(map);
@@ -79,7 +95,11 @@ export function PricingCalendarManager() {
       smoobuMap.set(r.date, r.price_cents);
     }
     setSmoobuRates(smoobuMap);
+    setLoading(false);
+  }
 
+  async function loadSettings() {
+    const settingsRes = await fetch("/api/admin/settings").then((r) => r.json());
     if (settingsRes.settings) {
       setSettings(settingsRes.settings);
       setBaseForm({
@@ -89,55 +109,55 @@ export function PricingCalendarManager() {
         touristTaxEuros: (settingsRes.settings.tourist_tax_cents_per_person_per_night / 100).toString(),
       });
     }
-    setLoading(false);
   }
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time fetch on mount
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- load is stable for this one-time mount fetch
+    loadSettings();
   }, []);
 
-  function toggleDate(date: string) {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(date)) next.delete(date);
-      else next.add(date);
-      return next;
-    });
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on month change
+    loadMonth(viewMonth);
+    setSelectedDate(null);
+  }, [viewMonth]);
+
+  function selectDate(iso: string) {
+    setSelectedDate(iso);
+    const override = overrides.get(iso);
+    setManualEnabled(override !== undefined);
+    setManualPriceInput(
+      override !== undefined
+        ? (override / 100).toString()
+        : ((smoobuRates.get(iso) ?? settings?.base_price_cents ?? 0) / 100).toString()
+    );
   }
 
-  async function applyPrice() {
-    const priceCents = Math.round(parseFloat(priceInput.replace(",", ".")) * 100);
-    if (!Number.isFinite(priceCents) || selected.size === 0) return;
+  async function saveSelectedDate() {
+    if (!selectedDate) return;
+    setSavingDate(true);
+    const priceCents = manualEnabled
+      ? Math.round(parseFloat(manualPriceInput.replace(",", ".")) * 100)
+      : null;
+
+    if (manualEnabled && !Number.isFinite(priceCents)) {
+      setError("Prezzo non valido");
+      setSavingDate(false);
+      return;
+    }
 
     const ok = await withErrorHandling(() =>
       fetch("/api/admin/pricing", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dates: Array.from(selected), priceCents }),
+        body: JSON.stringify({ dates: [selectedDate], priceCents }),
       })
     );
     if (ok) {
-      setSelected(new Set());
-      setPriceInput("");
-      await load();
+      await loadMonth(viewMonth);
+      setSelectedDate(null);
     }
-  }
-
-  async function resetSelected() {
-    if (selected.size === 0) return;
-    const ok = await withErrorHandling(() =>
-      fetch("/api/admin/pricing", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dates: Array.from(selected), priceCents: null }),
-      })
-    );
-    if (ok) {
-      setSelected(new Set());
-      await load();
-    }
+    setSavingDate(false);
   }
 
   async function saveBaseSettings(e: React.FormEvent) {
@@ -161,10 +181,30 @@ export function PricingCalendarManager() {
         }),
       })
     );
-    if (ok) await load();
+    if (ok) await loadSettings();
   }
 
-  if (loading) return <p className="text-sm text-stone">Caricamento...</p>;
+  async function syncNow() {
+    setSyncing(true);
+    setSyncResult(null);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/smoobu-sync", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data?.error ?? "Sincronizzazione non riuscita");
+      } else {
+        setSyncResult({ availability: data.availability, rates: data.rates });
+        await loadMonth(viewMonth);
+      }
+    } catch {
+      setError("Impossibile contattare il server. Riprova.");
+    }
+    setSyncing(false);
+  }
+
+  const canGoPrev = isBefore(today, viewMonth);
+  const canGoNext = isBefore(viewMonth, maxMonth);
 
   return (
     <div>
@@ -220,30 +260,62 @@ export function PricingCalendarManager() {
       </form>
 
       <div className="mt-6 flex flex-wrap items-center gap-3 border border-mist bg-paper p-4">
-        <p className="text-xs text-stone">
-          {selected.size > 0 ? `${selected.size} date selezionate` : "Seleziona una o più date nel calendario"}
-        </p>
-        <input
-          value={priceInput}
-          onChange={(e) => setPriceInput(e.target.value)}
-          placeholder="Prezzo €"
-          className="w-28 border border-mist bg-paper px-3 py-1.5 text-sm"
-          disabled={selected.size === 0}
-        />
         <button
-          onClick={applyPrice}
-          disabled={selected.size === 0 || !priceInput}
-          className="border border-ink px-3 py-1.5 text-xs uppercase tracking-[0.1em] text-ink hover:bg-ink hover:text-paper disabled:opacity-40"
+          onClick={syncNow}
+          disabled={syncing}
+          className="flex items-center gap-2 border border-ink px-3 py-1.5 text-xs uppercase tracking-[0.1em] text-ink hover:bg-ink hover:text-paper disabled:opacity-40"
         >
-          Applica prezzo
+          <RefreshCw size={14} className={syncing ? "animate-spin" : ""} />
+          {syncing ? "Sincronizzazione..." : "Sincronizza ora da Smoobu"}
         </button>
-        <button
-          onClick={resetSelected}
-          disabled={selected.size === 0}
-          className="border border-mist px-3 py-1.5 text-xs uppercase tracking-[0.1em] text-charcoal disabled:opacity-40"
+        {syncResult && (
+          <p className="text-xs text-stone">
+            {syncResult.availability.ok
+              ? `${syncResult.availability.synced ?? 0} date bloccate`
+              : `Errore date: ${syncResult.availability.error}`}
+            {" · "}
+            {syncResult.rates.ok
+              ? `${syncResult.rates.synced ?? 0} tariffe aggiornate`
+              : `Errore tariffe: ${syncResult.rates.error}`}
+          </p>
+        )}
+      </div>
+
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border border-mist bg-paper p-4">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setViewMonth((m) => addMonths(m, -1))}
+            disabled={!canGoPrev}
+            aria-label="Mese precedente"
+            className="border border-mist p-1.5 text-charcoal hover:bg-fog disabled:opacity-30"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <button
+            onClick={() => setViewMonth((m) => addMonths(m, 1))}
+            disabled={!canGoNext}
+            aria-label="Mese successivo"
+            className="border border-mist p-1.5 text-charcoal hover:bg-fog disabled:opacity-30"
+          >
+            <ChevronRight size={16} />
+          </button>
+          <p className="font-serif text-lg capitalize text-ink">{format(viewMonth, "MMMM yyyy", { locale: it })}</p>
+        </div>
+
+        <select
+          value={format(viewMonth, "yyyy-MM")}
+          onChange={(e) => {
+            const [y, m] = e.target.value.split("-").map(Number);
+            setViewMonth(new Date(y, m - 1, 1));
+          }}
+          className="border border-mist bg-paper px-3 py-1.5 text-xs uppercase tracking-[0.1em] text-charcoal"
         >
-          Rimuovi prezzo manuale
-        </button>
+          {monthOptions.map((m) => (
+            <option key={format(m, "yyyy-MM")} value={format(m, "yyyy-MM")}>
+              {format(m, "MMMM yyyy", { locale: it })}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-4 text-[11px] text-stone">
@@ -258,17 +330,79 @@ export function PricingCalendarManager() {
         </span>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {months.map((month) => (
+      <div className="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+        {loading ? (
+          <p className="text-sm text-stone">Caricamento...</p>
+        ) : (
           <MonthGrid
-            key={month.toISOString()}
-            month={month}
+            month={viewMonth}
             overrides={overrides}
             smoobuRates={smoobuRates}
-            selected={selected}
-            onToggle={toggleDate}
+            selectedDate={selectedDate}
+            onSelect={selectDate}
           />
-        ))}
+        )}
+
+        {selectedDate && (
+          <div className="h-fit border border-mist bg-paper p-5">
+            <p className="font-serif text-base capitalize text-ink">
+              {format(new Date(selectedDate), "EEEE d MMMM yyyy", { locale: it })}
+            </p>
+
+            <dl className="mt-3 space-y-1 text-xs text-stone">
+              {smoobuRates.get(selectedDate) !== undefined && (
+                <div className="flex justify-between">
+                  <dt>Tariffa Smoobu</dt>
+                  <dd>{formatEuro(smoobuRates.get(selectedDate)!)} €</dd>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <dt>Prezzo base</dt>
+                <dd>{settings ? formatEuro(settings.base_price_cents) : "—"} €</dd>
+              </div>
+            </dl>
+
+            <label className="mt-4 flex items-center gap-2 text-xs uppercase tracking-[0.1em] text-charcoal">
+              <input
+                type="checkbox"
+                checked={manualEnabled}
+                onChange={(e) => setManualEnabled(e.target.checked)}
+              />
+              Prezzo manuale per questa data
+            </label>
+
+            {manualEnabled && (
+              <input
+                value={manualPriceInput}
+                onChange={(e) => setManualPriceInput(e.target.value)}
+                placeholder="Prezzo €"
+                className="mt-2 w-full border border-mist bg-paper px-3 py-1.5 text-sm"
+              />
+            )}
+
+            {!manualEnabled && (
+              <p className="mt-2 text-xs text-stone">
+                Seguirà {smoobuRates.get(selectedDate) !== undefined ? "la tariffa Smoobu" : "il prezzo base"}.
+              </p>
+            )}
+
+            <div className="mt-4 flex gap-2">
+              <button
+                onClick={saveSelectedDate}
+                disabled={savingDate}
+                className="border border-ink px-3 py-1.5 text-xs uppercase tracking-[0.1em] text-ink hover:bg-ink hover:text-paper disabled:opacity-40"
+              >
+                Salva
+              </button>
+              <button
+                onClick={() => setSelectedDate(null)}
+                className="border border-mist px-3 py-1.5 text-xs uppercase tracking-[0.1em] text-charcoal"
+              >
+                Chiudi
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -278,14 +412,14 @@ function MonthGrid({
   month,
   overrides,
   smoobuRates,
-  selected,
-  onToggle,
+  selectedDate,
+  onSelect,
 }: {
   month: Date;
   overrides: Map<string, number>;
   smoobuRates: Map<string, number>;
-  selected: Set<string>;
-  onToggle: (date: string) => void;
+  selectedDate: string | null;
+  onSelect: (date: string) => void;
 }) {
   const start = startOfMonth(month);
   const end = endOfMonth(month);
@@ -294,10 +428,7 @@ function MonthGrid({
 
   return (
     <div className="border border-mist bg-paper p-4">
-      <p className="mb-3 text-center font-serif text-base capitalize text-ink">
-        {format(month, "MMMM yyyy")}
-      </p>
-      <div className="grid grid-cols-7 gap-1 text-center text-[9px] uppercase text-stone">
+      <div className="grid grid-cols-7 gap-1 text-center text-[10px] uppercase text-stone">
         {WEEKDAY_LABELS.map((w, i) => (
           <span key={i}>{w}</span>
         ))}
@@ -310,7 +441,7 @@ function MonthGrid({
           const iso = format(day, "yyyy-MM-dd");
           const override = overrides.get(iso);
           const smoobuPrice = smoobuRates.get(iso);
-          const isSelected = selected.has(iso);
+          const isSelected = selectedDate === iso;
           const source: "manual" | "smoobu" | "base" =
             override !== undefined ? "manual" : smoobuPrice !== undefined ? "smoobu" : "base";
           const effectivePrice = override ?? smoobuPrice;
@@ -318,10 +449,9 @@ function MonthGrid({
           return (
             <button
               key={iso}
-              onClick={() => onToggle(iso)}
-              title={effectivePrice !== undefined ? `${(effectivePrice / 100).toFixed(2)} €` : undefined}
+              onClick={() => onSelect(iso)}
               className={[
-                "flex aspect-square flex-col items-center justify-center gap-0.5 text-[10px] transition-colors",
+                "flex aspect-square flex-col items-center justify-center gap-0.5 text-[11px] transition-colors",
                 isSelected
                   ? "bg-ink text-paper"
                   : source === "manual"
@@ -332,8 +462,10 @@ function MonthGrid({
               ].join(" ")}
             >
               <span>{format(day, "d")}</span>
-              {effectivePrice !== undefined && !isSelected && (
-                <span className="text-[8px] text-graphite">{Math.round(effectivePrice / 100)}€</span>
+              {effectivePrice !== undefined && (
+                <span className={isSelected ? "text-[9px] text-paper/80" : "text-[9px] text-graphite"}>
+                  {Math.round(effectivePrice / 100)}€
+                </span>
               )}
             </button>
           );

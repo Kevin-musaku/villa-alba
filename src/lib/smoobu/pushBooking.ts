@@ -33,18 +33,20 @@ async function pushPriceElements(smoobuReservationId: number, booking: BookingRo
 }
 
 /**
- * Dopo un pagamento confermato, spinge la prenotazione diretta su Smoobu
- * così le altre piattaforme (Airbnb, Booking.com...) vedono le date come
- * occupate. Se SMOOBU_API_KEY non è impostata, segna semplicemente
- * smoobu_push_status='not_pushed' e non fa nulla: nessun errore bloccante,
- * il pagamento resta comunque confermato.
+ * Spinge subito la prenotazione (tentativa) su Smoobu al momento del
+ * checkout, non dopo il pagamento: così le altre piattaforme (Airbnb,
+ * Booking.com...) vedono le date occupate già durante il pagamento, evitando
+ * un doppio-booking da un altro canale nel frattempo. Se il pagamento scade o
+ * fallisce, il chiamante deve annullarla con cancelSmoobuReservation(). Se
+ * SMOOBU_API_KEY non è impostata, segna semplicemente
+ * smoobu_push_status='not_pushed' e non fa nulla: nessun errore bloccante.
  */
-export async function pushBookingToSmoobu(booking: BookingRow): Promise<void> {
+export async function pushBookingToSmoobu(booking: BookingRow): Promise<string | null> {
   const supabase = getSupabaseServerClient();
-  if (!supabase) return;
+  if (!supabase) return null;
 
   if (!isSmoobuConfigured()) {
-    return;
+    return null;
   }
 
   const propertyId = process.env.SMOOBU_PROPERTY_ID;
@@ -54,7 +56,7 @@ export async function pushBookingToSmoobu(booking: BookingRow): Promise<void> {
       .from("bookings")
       .update({ smoobu_push_status: "failed" })
       .eq("id", booking.id);
-    return;
+    return null;
   }
 
   const res = await smoobuFetch<SmoobuCreateReservationResponse>("/reservations", {
@@ -81,10 +83,28 @@ export async function pushBookingToSmoobu(booking: BookingRow): Promise<void> {
     // Best-effort, non bloccante: un fallimento qui non deve mai
     // retrocedere lo stato "pushed" appena impostato sopra.
     await pushPriceElements(res.id, booking);
-  } else {
-    await supabase
-      .from("bookings")
-      .update({ smoobu_push_status: "failed" })
-      .eq("id", booking.id);
+    return String(res.id);
+  }
+
+  await supabase
+    .from("bookings")
+    .update({ smoobu_push_status: "failed" })
+    .eq("id", booking.id);
+  return null;
+}
+
+/**
+ * Annulla su Smoobu la prenotazione tentativa creata al checkout, quando il
+ * pagamento scade o fallisce. Best-effort: se la chiamata fallisce (es. rete),
+ * logga soltanto — la prenotazione locale resta comunque "cancelled" e non
+ * blocca più il calendario del sito, anche se andrà rimossa a mano da Smoobu.
+ */
+export async function cancelSmoobuReservation(smoobuReservationId: string): Promise<void> {
+  if (!isSmoobuConfigured()) return;
+
+  try {
+    await smoobuFetch(`/reservations/${smoobuReservationId}`, { method: "DELETE" });
+  } catch (err) {
+    console.error("[smoobu] errore annullamento prenotazione (non bloccante)", err);
   }
 }
