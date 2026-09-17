@@ -155,11 +155,11 @@ richiesta rispetto a quanto già impostato):
 4. Aggiorna l'URL del webhook Stripe (punto 2.3) con il dominio definitivo
    una volta noto.
 
-## 9. Sincronizzazione Smoobu ogni 2 minuti (oltre al cron giornaliero)
+## 9. Sincronizzazione Smoobu ogni 5 minuti (oltre al cron giornaliero)
 
 Il piano Vercel Hobby limita il proprio Cron Job (`vercel.json`) a una
 volta al giorno. La migration `0007_smoobu_sync_cron.sql` aggiunge una
-sincronizzazione molto più frequente (ogni 2 minuti) usando `pg_cron` +
+sincronizzazione molto più frequente (ogni 5 minuti) usando `pg_cron` +
 `pg_net` dentro Supabase — gratuito su ogni piano, nessun servizio esterno.
 Il cron giornaliero di Vercel resta comunque attivo come rete di sicurezza.
 
@@ -191,8 +191,8 @@ Passaggi manuali una tantum, da fare dopo il primo deploy:
    );
    ```
 
-Nota: passare da 1 a ~720 chiamate/giorno verso l'API di Smoobu potrebbe
+Nota: passare da 1 a ~288 chiamate/giorno verso l'API di Smoobu potrebbe
 avvicinare eventuali limiti di rate-limit del vostro piano Smoobu — se nei
-log compaiono errori 429, allarga l'intervallo modificando `'*/2 * * * *'`
+log compaiono errori 429, allarga l'intervallo modificando `'*/5 * * * *'`
 nella migration (o rischedulando il job via SQL editor senza una nuova
-migration: `select cron.alter_job(job_id, schedule := '*/5 * * * *')`).
+migration: `select cron.alter_job(job_id, schedule := '*/10 * * * *')`).

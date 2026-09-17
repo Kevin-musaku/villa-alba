@@ -1,8 +1,8 @@
--- Villa Alba — sincronizzazione Smoobu ogni 2 minuti via pg_cron + pg_net.
+-- Villa Alba — sincronizzazione Smoobu ogni 5 minuti via pg_cron + pg_net.
 --
 -- Il piano Vercel Hobby limita il SUO cron (vercel.json) a una volta al
 -- giorno. Questo job gira invece dentro Supabase (gratuito su ogni piano) e
--- chiama l'endpoint /api/smoobu/sync del sito ogni 2 minuti, indipendente
+-- chiama l'endpoint /api/smoobu/sync del sito ogni 5 minuti, indipendente
 -- dal limite di Vercel. Il cron giornaliero di vercel.json resta comunque
 -- attivo come rete di sicurezza.
 --
@@ -22,8 +22,8 @@ create extension if not exists pg_net;
 
 select
   cron.schedule(
-    'smoobu-sync-2min',
-    '*/2 * * * *',
+    'smoobu-sync-5min',
+    '*/5 * * * *',
     $$
     select net.http_post(
       url := (select decrypted_secret from vault.decrypted_secrets where name = 'smoobu_sync_url'),
@@ -34,4 +34,4 @@ select
     ) as request_id;
     $$
   )
-where not exists (select 1 from cron.job where jobname = 'smoobu-sync-2min');
+where not exists (select 1 from cron.job where jobname = 'smoobu-sync-5min');
