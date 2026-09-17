@@ -16,7 +16,7 @@ export function VinoGrid({
     new Intl.NumberFormat(currencyLocale, { style: "currency", currency }).format(cents / 100);
 
   return (
-    <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2">
+    <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
       {wines.map((wine, i) => (
         <motion.div
           key={wine.id}
@@ -32,7 +32,7 @@ export function VinoGrid({
                 src={wine.imageSrc}
                 alt={wine.name}
                 fill
-                sizes="(min-width: 640px) 50vw, 100vw"
+                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
             ) : (
