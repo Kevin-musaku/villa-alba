@@ -1,0 +1,260 @@
+{
+  "meta": {
+    "title": "Villa Alba — Franciacorta",
+    "description": "Ein privates Landhaus zwischen den Weinbergen der Franciacorta, wenige Minuten vom Iseosee entfernt. Vier Schlafzimmer, Garten, Swimmingpool und Tisch im Freien."
+  },
+  "nav": {
+    "home": "Startseite",
+    "villa": "Die Villa",
+    "territorio": "Die Umgebung",
+    "vini": "Unsere Weine",
+    "attivita": "Aktivitäten",
+    "galleria": "Galerie",
+    "regole": "Hausordnung",
+    "contatti": "Kontakt",
+    "prenota": "Jetzt buchen"
+  },
+  "language": {
+    "it": "Italiano",
+    "en": "English",
+    "de": "Deutsch",
+    "es": "Español",
+    "fr": "Français"
+  },
+  "hero": {
+    "kicker": "Franciacorta, zwischen Weinbergen und See",
+    "title": "Villa Alba",
+    "subtitle": "Ein privates Haus inmitten der Weinberge der Franciacorta, wenige Minuten vom Iseosee entfernt.",
+    "scroll": "Zum Entdecken scrollen",
+    "cta": "Aufenthalt buchen"
+  },
+  "villa": {
+    "kicker": "Die Villa",
+    "title": "394 m² für gemeinsame Momente",
+    "intro": "Villa Alba erstreckt sich über mehrere Ebenen mit Wohnbereich, vier Schlafzimmern und einem großzügigen Untergeschoss und bietet komfortabel Platz für bis zu 8 Gäste.",
+    "stats": {
+      "sqm": {
+        "value": "394",
+        "unit": "m²",
+        "label": "Wohnfläche"
+      },
+      "bedrooms": {
+        "value": "4",
+        "label": "Schlafzimmer"
+      },
+      "guests": {
+        "value": "8",
+        "label": "Max. Gäste"
+      },
+      "pool": {
+        "label": "Privater Pool"
+      }
+    },
+    "rooms": {
+      "title": "Die Schlafzimmer",
+      "master": {
+        "name": "Unabhängiges Hauptschlafzimmer",
+        "description": "Mit eigenem, vom Rest des Hauses getrenntem Eingang und privatem Bad für vollständige Privatsphäre."
+      },
+      "double1": {
+        "name": "Doppelzimmer",
+        "description": "Helles Zimmer mit Doppelbett und Blick ins Grüne."
+      },
+      "double2": {
+        "name": "Doppelzimmer mit eigenem Bad",
+        "description": "Doppelbett mit privatem Bad en suite für einen ruhigen Aufenthalt."
+      },
+      "twin": {
+        "name": "Zweibettzimmer",
+        "description": "Zwei Dreiviertelbetten, ideal für Freunde oder Kinder."
+      }
+    },
+    "bathrooms": {
+      "title": "Die Badezimmer",
+      "description": "Neben den privaten Bädern der Zimmer verfügt die Villa über zwei weitere große Gemeinschaftsbäder für die Gäste."
+    },
+    "cucina": {
+      "title": "Küche",
+      "description": "Eine voll ausgestattete offene Küche, verbunden mit dem Wohnzimmer, ideal zum gemeinsamen Kochen während des Aufenthalts."
+    },
+    "salaDaPranzo": {
+      "title": "Esszimmer",
+      "description": "Ein heller Essbereich, um Mahlzeiten zu teilen, mit Platz für alle Gäste der Villa."
+    },
+    "soggiorno": {
+      "title": "Wohnzimmer",
+      "description": "Ein großzügiges Wohnzimmer am Eingang des Hauses, das Herzstück des Wohnbereichs und Treffpunkt für alle Gäste."
+    },
+    "piscina": {
+      "title": "Swimmingpool",
+      "description": "Ein privater Pool inmitten von Grün, ideal zur Abkühlung zwischen den Weinbergtouren."
+    },
+    "esterno": {
+      "title": "Garten & Außenbereich",
+      "description": "Ein großer privater Garten mit Esstisch im Freien, um die Abende der Franciacorta unter freiem Himmel zu genießen."
+    },
+    "amenities": {
+      "title": "Ausstattung",
+      "items": [
+        "Klimaanlage im gesamten Haus und im Wohnbereich",
+        "WLAN-Verbindung",
+        "Voll ausgestattete Küche",
+        "Hand- und Bettwäsche inklusive",
+        "Backofen, Mikrowelle und Geschirrspüler",
+        "Kaffeemaschine, Wasserkocher und Toaster",
+        "Heizung",
+        "Zusätzliche Außenparkplätze verfügbar",
+        "Eigener Waschraum",
+        "Garage mit zwei überdachten Stellplätzen"
+      ]
+    }
+  },
+  "territorio": {
+    "kicker": "Die Umgebung",
+    "title": "Zwischen Weinbergen, Weingütern und dem Iseosee",
+    "intro": "Villa Alba liegt in Erbusco, im Herzen der Franciacorta: eine der renommiertesten Weinregionen Italiens, geprägt von historischen Weingütern und den Ufern des Iseosees. Eine Landschaft, die man mit dem Fahrrad, zu Pferd oder mit einem Glas in der Hand entdecken kann.",
+    "mapTitle": "Wo wir uns befinden",
+    "poiTitle": "In der Umgebung",
+    "poiNote": "Eine Auswahl an Weingütern und Reitställen der Region: die vollständige, aktuelle Liste wird direkt von der Unterkunft gepflegt.",
+    "pois": [
+      {
+        "name": "Weingüter der Franciacorta",
+        "distance": "ab 5 Minuten mit dem Auto",
+        "type": "Verkostungen und geführte Touren"
+      },
+      {
+        "name": "Iseosee",
+        "distance": "etwa 15 Minuten mit dem Auto",
+        "type": "Spaziergänge, Strände und Restaurants am Seeufer"
+      },
+      {
+        "name": "Reitställe der Franciacorta",
+        "distance": "ab 10 Minuten mit dem Auto",
+        "type": "Ausritte durch die Weinberge"
+      },
+      {
+        "name": "Historische Ortschaften rund um Erbusco",
+        "distance": "wenige Minuten zu Fuß oder mit dem Auto",
+        "type": "Architektur, Geschäfte und typische Restaurants"
+      }
+    ]
+  },
+  "vini": {
+    "kicker": "Unsere Weine",
+    "title": "Eine Auswahl an Franciacorta-Weinen",
+    "intro": "Eine kleine Auswahl regionaler Etiketten, auf Anfrage während Ihres Aufenthalts erhältlich."
+  },
+  "attivita": {
+    "kicker": "Aktivitäten",
+    "title": "Erleben Sie die Franciacorta mit uns",
+    "intro": "Weinverkostungen, Bootsfahrten und weitere Erlebnisse auf Anfrage während Ihres Aufenthalts."
+  },
+  "gallery": {
+    "kicker": "Galerie",
+    "title": "Villa Alba in Bildern",
+    "intro": "Die Räume der Villa, die umliegenden Weinberge, der Iseosee und die Weingüter der Franciacorta.",
+    "categories": {
+      "villa": "Die Villa",
+      "vigneti": "Die Weinberge",
+      "lago": "Der See",
+      "cantine": "Die Weingüter"
+    }
+  },
+  "houseRules": {
+    "kicker": "Hausordnung",
+    "title": "Wenige Regeln, für das Wohl aller",
+    "rules": [
+      {
+        "title": "Rauchen verboten",
+        "description": "In der Villa ist das Rauchen nicht gestattet."
+      },
+      {
+        "title": "Haustiere nicht erlaubt",
+        "description": "Ein Aufenthalt mit Haustieren ist nicht möglich."
+      },
+      {
+        "title": "Check-in",
+        "description": "Von 16:00 bis 18:00 Uhr."
+      },
+      {
+        "title": "Check-out",
+        "description": "Bis 11:00 Uhr."
+      },
+      {
+        "title": "Maximal 8 Gäste",
+        "description": "Die maximale Belegung der Villa beträgt 8 Gäste."
+      },
+      {
+        "title": "Veranstaltungen auf Anfrage",
+        "description": "Veranstaltungen können nur nach vorheriger Absprache mit der Unterkunft organisiert werden."
+      }
+    ]
+  },
+  "booking": {
+    "kicker": "Buchung",
+    "title": "Buchen Sie Ihren Aufenthalt",
+    "subtitle": "Wählen Sie Ihre Aufenthaltsdaten: der Preis wird pro Nacht berechnet.",
+    "comingSoon": "Die Online-Buchung wird in Kürze verfügbar sein.",
+    "calendar": {
+      "checkIn": "Anreise",
+      "checkOut": "Abreise",
+      "selectPrompt": "Wählen Sie An- und Abreisedatum",
+      "legend": "Nicht verfügbare Termine sind im Kalender deaktiviert."
+    },
+    "summary": {
+      "title": "Zusammenfassung",
+      "nightsLabel": "Nächte",
+      "rentalSubtotalLabel": "Zwischensumme Miete",
+      "cleaningFeeLabel": "Endreinigung",
+      "touristTaxLabel": "Kurtaxe",
+      "touristTaxDetail": "{guests} Gäste × {nights} Nächte",
+      "totalLabel": "Gesamt",
+      "perNight": "pro Nacht",
+      "minStayNotice": "Mindestaufenthalt: {min} Nächte"
+    },
+    "form": {
+      "guestsLabel": "Anzahl der Gäste",
+      "guestsHint": "Maximal 8 Gäste",
+      "nameLabel": "Vollständiger Name",
+      "emailLabel": "E-Mail",
+      "phoneLabel": "Telefon (optional)",
+      "submitCta": "Weiter zur Zahlung",
+      "redirecting": "Weiterleitung zur sicheren Zahlung..."
+    },
+    "errors": {
+      "unavailable": "Die ausgewählten Termine sind nicht mehr verfügbar.",
+      "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+      "notConfigured": "Die Online-Zahlung wird in Kürze aktiviert. Bitte kontaktieren Sie uns direkt, um zu buchen."
+    }
+  },
+  "grazie": {
+    "title": "Vielen Dank für Ihre Buchung!",
+    "message": "Ihre Zahlung wurde erfolgreich abgeschlossen. Sie erhalten in Kürze eine Bestätigungs-E-Mail.",
+    "backHome": "Zurück zur Startseite"
+  },
+  "footer": {
+    "title": "Villa Alba",
+    "addressTitle": "Wo wir sind",
+    "address": "Via Pietro Gobetti 7, Villa Pedergnano di Erbusco, 25030 Franciacorta (BS), Italien",
+    "contactTitle": "Kontakt",
+    "emailLabel": "E-Mail",
+    "pecLabel": "Zertifizierte E-Mail (PEC)",
+    "phoneLabel": "Telefon",
+    "rights": "Alle Rechte vorbehalten.",
+    "vatLabel": "USt-IdNr.",
+    "cirLabel": "CIR",
+    "cinLabel": "CIN",
+    "privacyLink": "Datenschutz",
+    "cookieLink": "Cookie-Richtlinie"
+  },
+  "cookieBanner": {
+    "text": "Diese Website verwendet technisch notwendige Cookies (z. B. Admin-Login, Stripe-Zahlungen) und, mit Ihrer Zustimmung, Cookies von Drittanbietern zur Verbesserung Ihrer Erfahrung. Weitere Informationen in unserer",
+    "linkLabel": "Cookie-Richtlinie",
+    "necessaryOnly": "Nur notwendige Cookies",
+    "acceptAll": "Alle akzeptieren"
+  },
+  "legal": {
+    "lastUpdated": "Letzte Aktualisierung: September 2026",
+    "onlyItalianNotice": "Diese Richtlinie ist nur auf Italienisch verfügbar, der rechtlich maßgeblichen Sprache für dieses Unternehmen. Bei Fragen schreiben Sie uns an villa.alba.franciacorta@gmail.com."
+  }
+}

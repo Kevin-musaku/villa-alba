@@ -1,0 +1,260 @@
+{
+  "meta": {
+    "title": "Villa Alba — Franciacorta",
+    "description": "Una villa independiente entre los viñedos de Franciacorta, a pocos minutos del lago de Iseo. Cuatro dormitorios, jardín, piscina y mesa para comer al aire libre."
+  },
+  "nav": {
+    "home": "Inicio",
+    "villa": "La Villa",
+    "territorio": "El Territorio",
+    "vini": "Nuestros Vinos",
+    "attivita": "Actividades",
+    "galleria": "Galería",
+    "regole": "Normas de la Casa",
+    "contatti": "Contacto",
+    "prenota": "Reservar"
+  },
+  "language": {
+    "it": "Italiano",
+    "en": "English",
+    "de": "Deutsch",
+    "es": "Español",
+    "fr": "Français"
+  },
+  "hero": {
+    "kicker": "Franciacorta, entre viñedos y el lago",
+    "title": "Villa Alba",
+    "subtitle": "Una casa independiente rodeada de los viñedos de Franciacorta, a pocos minutos del lago de Iseo.",
+    "scroll": "Desplázate para descubrir",
+    "cta": "Reserva tu estancia"
+  },
+  "villa": {
+    "kicker": "La Villa",
+    "title": "394 m² pensados para disfrutar en compañía",
+    "intro": "Villa Alba se desarrolla en varios niveles entre la zona de día, cuatro dormitorios y un amplio sótano, acogiendo cómodamente hasta 8 huéspedes.",
+    "stats": {
+      "sqm": {
+        "value": "394",
+        "unit": "m²",
+        "label": "Superficie interior"
+      },
+      "bedrooms": {
+        "value": "4",
+        "label": "Dormitorios"
+      },
+      "guests": {
+        "value": "8",
+        "label": "Huéspedes máx."
+      },
+      "pool": {
+        "label": "Piscina privada"
+      }
+    },
+    "rooms": {
+      "title": "Los Dormitorios",
+      "master": {
+        "name": "Dormitorio Principal Independiente",
+        "description": "Con entrada separada del resto de la casa y baño privado, para la máxima privacidad."
+      },
+      "double1": {
+        "name": "Dormitorio Doble",
+        "description": "Habitación luminosa con cama de matrimonio, con vistas al entorno natural."
+      },
+      "double2": {
+        "name": "Dormitorio Doble con Baño Privado",
+        "description": "Cama de matrimonio con baño privado en suite, para una estancia más reservada."
+      },
+      "twin": {
+        "name": "Dormitorio Doble Individual",
+        "description": "Dos camas de una plaza y media, ideal para amigos o niños."
+      }
+    },
+    "bathrooms": {
+      "title": "Los Baños",
+      "description": "Además de los baños privados de las habitaciones, la villa dispone de otros dos amplios baños comunes para los huéspedes."
+    },
+    "cucina": {
+      "title": "Cocina",
+      "description": "Una cocina totalmente equipada de estilo abierto, conectada al salón, pensada para cocinar juntos durante la estancia."
+    },
+    "salaDaPranzo": {
+      "title": "Comedor",
+      "description": "Una zona de comedor luminosa para compartir las comidas, con espacio para todos los huéspedes de la villa."
+    },
+    "soggiorno": {
+      "title": "Salón",
+      "description": "Un amplio salón en la entrada de la casa, el corazón de la zona de día y punto de encuentro para los huéspedes."
+    },
+    "piscina": {
+      "title": "Piscina",
+      "description": "Una piscina privada rodeada de vegetación, ideal para refrescarse entre paseo y paseo por los viñedos."
+    },
+    "esterno": {
+      "title": "Jardín y Exterior",
+      "description": "Un amplio jardín privado con mesa para comer al aire libre, para disfrutar de las tardes de Franciacorta al aire libre."
+    },
+    "amenities": {
+      "title": "Servicios y Comodidades",
+      "items": [
+        "Aire acondicionado en toda la casa y en la zona de día",
+        "Conexión Wi-Fi",
+        "Cocina totalmente equipada",
+        "Toallas y ropa de cama incluidas",
+        "Horno, microondas y lavavajillas",
+        "Cafetera, hervidor y tostadora",
+        "Calefacción",
+        "Aparcamientos exteriores adicionales disponibles",
+        "Lavadero independiente",
+        "Garaje con dos plazas de aparcamiento cubiertas"
+      ]
+    }
+  },
+  "territorio": {
+    "kicker": "El Territorio",
+    "title": "Entre viñedos, bodegas y el lago de Iseo",
+    "intro": "Villa Alba se encuentra en Erbusco, en el corazón de Franciacorta: una de las regiones vinícolas más reconocidas de Italia, salpicada de bodegas históricas y bañada por las orillas del lago de Iseo. Un territorio para descubrir en bicicleta, a caballo o con una copa en la mano.",
+    "mapTitle": "Dónde estamos",
+    "poiTitle": "En los alrededores",
+    "poiNote": "Una selección de bodegas y centros ecuestres de la zona: la lista completa y actualizada la gestiona directamente la propiedad.",
+    "pois": [
+      {
+        "name": "Bodegas de Franciacorta",
+        "distance": "desde 5 minutos en coche",
+        "type": "Catas y visitas guiadas"
+      },
+      {
+        "name": "Lago de Iseo",
+        "distance": "unos 15 minutos en coche",
+        "type": "Paseos, playas y restaurantes junto al lago"
+      },
+      {
+        "name": "Centros Ecuestres de Franciacorta",
+        "distance": "desde 10 minutos en coche",
+        "type": "Paseos a caballo entre los viñedos"
+      },
+      {
+        "name": "Pueblos históricos de Erbusco y alrededores",
+        "distance": "a pocos minutos a pie o en coche",
+        "type": "Arquitectura, tiendas y restaurantes típicos"
+      }
+    ]
+  },
+  "vini": {
+    "kicker": "Nuestros Vinos",
+    "title": "Una selección de Franciacorta para descubrir",
+    "intro": "Una pequeña selección de etiquetas del territorio, disponible bajo petición durante la estancia."
+  },
+  "attivita": {
+    "kicker": "Actividades",
+    "title": "Vive la Franciacorta con nosotros",
+    "intro": "Catas de vino, paseos en barco y otras experiencias disponibles bajo petición durante tu estancia."
+  },
+  "gallery": {
+    "kicker": "Galería",
+    "title": "Villa Alba en imágenes",
+    "intro": "Los espacios de la villa, los viñedos que la rodean, el lago de Iseo y las bodegas de Franciacorta.",
+    "categories": {
+      "villa": "La Villa",
+      "vigneti": "Los Viñedos",
+      "lago": "El Lago",
+      "cantine": "Las Bodegas"
+    }
+  },
+  "houseRules": {
+    "kicker": "Normas de la Casa",
+    "title": "Pocas normas, para el bienestar de todos",
+    "rules": [
+      {
+        "title": "Prohibido fumar",
+        "description": "No está permitido fumar dentro de la villa."
+      },
+      {
+        "title": "No se admiten mascotas",
+        "description": "No es posible alojarse con animales domésticos."
+      },
+      {
+        "title": "Entrada (Check-in)",
+        "description": "De 16:00 a 18:00 horas."
+      },
+      {
+        "title": "Salida (Check-out)",
+        "description": "Antes de las 11:00 horas."
+      },
+      {
+        "title": "Máximo 8 huéspedes",
+        "description": "La capacidad máxima de la villa es de 8 huéspedes."
+      },
+      {
+        "title": "Eventos bajo petición",
+        "description": "La organización de eventos solo es posible previo acuerdo con la propiedad."
+      }
+    ]
+  },
+  "booking": {
+    "kicker": "Reserva",
+    "title": "Reserva tu estancia",
+    "subtitle": "Selecciona las fechas de tu estancia: el precio se calcula noche por noche.",
+    "comingSoon": "La reserva online estará disponible próximamente.",
+    "calendar": {
+      "checkIn": "Entrada",
+      "checkOut": "Salida",
+      "selectPrompt": "Selecciona las fechas de llegada y salida",
+      "legend": "Las fechas no disponibles aparecen desactivadas en el calendario."
+    },
+    "summary": {
+      "title": "Resumen",
+      "nightsLabel": "Noches",
+      "rentalSubtotalLabel": "Subtotal alquiler",
+      "cleaningFeeLabel": "Limpieza final",
+      "touristTaxLabel": "Tasa turística",
+      "touristTaxDetail": "{guests} huéspedes × {nights} noches",
+      "totalLabel": "Total",
+      "perNight": "por noche",
+      "minStayNotice": "Estancia mínima: {min} noches"
+    },
+    "form": {
+      "guestsLabel": "Número de huéspedes",
+      "guestsHint": "Máximo 8 huéspedes",
+      "nameLabel": "Nombre completo",
+      "emailLabel": "Email",
+      "phoneLabel": "Teléfono (opcional)",
+      "submitCta": "Proceder al pago",
+      "redirecting": "Redirigiendo al pago seguro..."
+    },
+    "errors": {
+      "unavailable": "Las fechas seleccionadas ya no están disponibles.",
+      "generic": "Se ha producido un error. Inténtalo de nuevo.",
+      "notConfigured": "El pago online estará activo próximamente. Contáctanos directamente para reservar."
+    }
+  },
+  "grazie": {
+    "title": "¡Gracias por tu reserva!",
+    "message": "El pago se ha completado correctamente. Recibirás un email de confirmación en breve.",
+    "backHome": "Volver al inicio"
+  },
+  "footer": {
+    "title": "Villa Alba",
+    "addressTitle": "Dónde estamos",
+    "address": "Via Pietro Gobetti 7, Villa Pedergnano di Erbusco, 25030 Franciacorta (BS), Italia",
+    "contactTitle": "Contacto",
+    "emailLabel": "Email",
+    "pecLabel": "Correo certificado (PEC)",
+    "phoneLabel": "Teléfono",
+    "rights": "Todos los derechos reservados.",
+    "vatLabel": "NIF/IVA",
+    "cirLabel": "CIR",
+    "cinLabel": "CIN",
+    "privacyLink": "Política de Privacidad",
+    "cookieLink": "Política de Cookies"
+  },
+  "cookieBanner": {
+    "text": "Este sitio utiliza cookies técnicas necesarias para su funcionamiento (p. ej. acceso de administrador, pagos con Stripe) y, si aceptas, cookies de terceros para mejorar tu experiencia. Más información en nuestra",
+    "linkLabel": "Política de Cookies",
+    "necessaryOnly": "Solo cookies necesarias",
+    "acceptAll": "Aceptar todas"
+  },
+  "legal": {
+    "lastUpdated": "Última actualización: septiembre de 2026",
+    "onlyItalianNotice": "Esta política solo está disponible en italiano, el idioma legalmente vigente para esta actividad. Si tienes dudas, escríbenos a villa.alba.franciacorta@gmail.com."
+  }
+}
