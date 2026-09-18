@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { requireAdminSession } from "@/lib/auth/session";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { uploadSiteImage, deleteSiteImage } from "@/lib/supabase/storage";
@@ -79,6 +80,7 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (error) throw error;
+    revalidatePath("/[locale]", "layout");
     return NextResponse.json({ image: data }, { status: 201 });
   } catch (err) {
     console.error("[admin/images] errore upload", err);
@@ -103,6 +105,7 @@ export async function DELETE(req: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   if (image?.storage_path) await deleteSiteImage(image.storage_path);
+  revalidatePath("/[locale]", "layout");
   return NextResponse.json({ ok: true });
 }
 
@@ -126,5 +129,6 @@ export async function PATCH(req: NextRequest) {
     )
   );
 
+  revalidatePath("/[locale]", "layout");
   return NextResponse.json({ ok: true });
 }
