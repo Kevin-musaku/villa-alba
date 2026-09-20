@@ -5,9 +5,13 @@ import { cancelSmoobuReservation } from "@/lib/smoobu/pushBooking";
 
 /**
  * Elimina una prenotazione dall'admin. Se era stata inviata a Smoobu, annulla
- * anche la prenotazione lì (best-effort) per liberare subito le date sul
- * calendario condiviso con gli altri canali. Non tocca Stripe: un eventuale
- * rimborso del pagamento va gestito a parte, manualmente.
+ * anche la prenotazione lì (best-effort) per liberare le date sul calendario
+ * condiviso con gli altri canali. Ripulisce subito anche blocked_dates_cache
+ * per quella prenotazione: quelle righe arrivano dal pull-sync periodico da
+ * Smoobu (che reimporta anche le nostre prenotazioni dirette) e altrimenti
+ * resterebbero fino al prossimo sync, mostrando le date come occupate sul
+ * sito anche dopo la cancellazione. Non tocca Stripe: un eventuale rimborso
+ * del pagamento va gestito a parte, manualmente.
  */
 export async function DELETE(
   req: NextRequest,
@@ -32,6 +36,11 @@ export async function DELETE(
 
   if (booking?.smoobu_reservation_id) {
     await cancelSmoobuReservation(booking.smoobu_reservation_id);
+    await supabase
+      .from("blocked_dates_cache")
+      .delete()
+      .eq("source", "smoobu")
+      .eq("smoobu_reservation_id", booking.smoobu_reservation_id);
   }
 
   return NextResponse.json({ ok: true });
