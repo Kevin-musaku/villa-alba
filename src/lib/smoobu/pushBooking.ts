@@ -59,13 +59,21 @@ export async function pushBookingToSmoobu(booking: BookingRow): Promise<string |
     return null;
   }
 
+  // Smoobu richiede firstName e lastName entrambi non vuoti: il sito raccoglie
+  // solo un campo "nome e cognome" unico, quindi lo dividiamo qui. Se non c'è
+  // uno spazio (nome singolo), ripetiamo lo stesso valore come cognome —
+  // altrimenti Smoobu rifiuta la richiesta con 400 "lastName is required".
+  const [firstName, ...rest] = booking.guest_name.trim().split(/\s+/);
+  const lastName = rest.length > 0 ? rest.join(" ") : firstName;
+
   const res = await smoobuFetch<SmoobuCreateReservationResponse>("/reservations", {
     method: "POST",
     body: JSON.stringify({
       apartmentId: Number(propertyId),
       arrivalDate: booking.check_in,
       departureDate: booking.check_out,
-      firstName: booking.guest_name,
+      firstName,
+      lastName,
       email: booking.guest_email,
       phone: booking.guest_phone ?? undefined,
       adults: booking.guests_count,
