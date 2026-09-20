@@ -33,11 +33,10 @@ async function pushPriceElements(smoobuReservationId: number, booking: BookingRo
 }
 
 /**
- * Spinge subito la prenotazione (tentativa) su Smoobu al momento del
- * checkout, non dopo il pagamento: così le altre piattaforme (Airbnb,
- * Booking.com...) vedono le date occupate già durante il pagamento, evitando
- * un doppio-booking da un altro canale nel frattempo. Se il pagamento scade o
- * fallisce, il chiamante deve annullarla con cancelSmoobuReservation(). Se
+ * Invia la prenotazione a Smoobu solo dopo il pagamento confermato (chiamata
+ * dal webhook Stripe su checkout.session.completed): così le altre
+ * piattaforme (Airbnb, Booking.com...) vedono le date occupate solo quando
+ * c'è un pagamento reale, non durante il semplice checkout. Se
  * SMOOBU_API_KEY non è impostata, segna semplicemente
  * smoobu_push_status='not_pushed' e non fa nulla: nessun errore bloccante.
  */

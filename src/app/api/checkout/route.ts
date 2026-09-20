@@ -5,8 +5,6 @@ import { calculateStay } from "@/lib/pricing/calculateStay";
 import { isRangeAvailable } from "@/lib/availability/getBlockedDates";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { getStripeClient, isStripeConfigured } from "@/lib/stripe/client";
-import { pushBookingToSmoobu, cancelSmoobuReservation } from "@/lib/smoobu/pushBooking";
-import type { BookingRow } from "@/lib/supabase/types";
 
 export async function POST(req: NextRequest) {
   const supabase = getSupabaseServerClient();
@@ -77,13 +75,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Errore durante la creazione della prenotazione" }, { status: 500 });
   }
 
-  let smoobuReservationId: string | null = null;
-  try {
-    smoobuReservationId = await pushBookingToSmoobu(booking as BookingRow);
-  } catch (err) {
-    console.error("[checkout] errore invio a Smoobu (non bloccante)", err);
-  }
-
   const stripe = getStripeClient();
   if (!stripe) {
     return NextResponse.json({ error: "Pagamenti non ancora configurati." }, { status: 503 });
@@ -139,7 +130,9 @@ export async function POST(req: NextRequest) {
       success_url: `${origin}/${locale}/grazie?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/${locale}/prenota`,
       // Minimo consentito da Stripe (30 minuti): evita che un pagamento
-      // abbandonato tenga le date bloccate per le 24 ore di default.
+      // abbandonato tenga le date bloccate sul calendario del sito (la
+      // prenotazione "pending" conta come occupata finché non scade o si
+      // conferma) per le 24 ore di default.
       expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
     });
 
@@ -152,9 +145,6 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error("[checkout] errore creazione sessione Stripe", err);
     await supabase.from("bookings").update({ status: "cancelled" }).eq("id", booking.id);
-    if (smoobuReservationId) {
-      await cancelSmoobuReservation(smoobuReservationId);
-    }
     return NextResponse.json({ error: "Errore durante la creazione del pagamento" }, { status: 500 });
   }
 }

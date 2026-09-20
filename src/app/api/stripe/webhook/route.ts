@@ -45,9 +45,9 @@ export async function POST(req: NextRequest) {
       if (error) {
         console.error("[stripe/webhook] errore aggiornamento prenotazione", error.message);
       } else if (booking) {
-        // La prenotazione è già stata inviata a Smoobu al momento del
-        // checkout (per bloccare subito il calendario sugli altri canali).
-        // Riprova qui solo se quell'invio non è riuscito.
+        // La prenotazione viene inviata a Smoobu solo ora, a pagamento
+        // confermato — non al momento del checkout, per non occupare le
+        // date sugli altri canali finché il cliente non ha davvero pagato.
         if ((booking as BookingRow).smoobu_push_status !== "pushed") {
           try {
             await pushBookingToSmoobu(booking as BookingRow);
