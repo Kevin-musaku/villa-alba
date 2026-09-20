@@ -33,6 +33,8 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
+const SITE_URL = "https://villaalbafranciacorta.com";
+
 export async function generateMetadata({
   params,
 }: {
@@ -40,9 +42,26 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "meta" });
+  const title = t("title");
+  const description = t("description");
+
   return {
-    title: t("title"),
-    description: t("description"),
+    metadataBase: new URL(SITE_URL),
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `${SITE_URL}/${locale}`,
+      siteName: "Villa Alba",
+      locale,
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
   };
 }
 
@@ -61,12 +80,40 @@ export default async function LocaleLayout({
 
   setRequestLocale(locale);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "LodgingBusiness",
+    name: "Villa Alba",
+    url: SITE_URL,
+    image: `${SITE_URL}/it/opengraph-image`,
+    telephone: "+39 331 7359787",
+    email: "villa.alba.franciacorta@gmail.com",
+    priceRange: "€€€",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "Via Pietro Gobetti 7, Villa Pedergnano di Erbusco",
+      addressLocality: "Erbusco",
+      addressRegion: "BS",
+      postalCode: "25030",
+      addressCountry: "IT",
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: 45.6167,
+      longitude: 9.9333,
+    },
+  };
+
   return (
     <html
       lang={locale}
       className={`${playfair.variable} ${manrope.variable} ${dmMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-paper text-ink">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <div className="grain-overlay" />
         <NextIntlClientProvider>
           <LenisProvider>

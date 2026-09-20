@@ -9,6 +9,27 @@ import {
 
 export type ResolvedImage = PlaceholderImage;
 
+// Testo alternativo di riserva quando l'admin carica una foto senza compilare
+// il campo alt (importante per accessibilità e SEO immagini — un <img> senza
+// alt descrittivo è invisibile per Google Immagini e per gli screen reader).
+const SECTION_ALT_FALLBACK: Record<string, string> = {
+  hero: "Villa Alba in Franciacorta",
+  master: "Camera matrimoniale di Villa Alba",
+  double1: "Camera matrimoniale di Villa Alba",
+  double2: "Camera matrimoniale di Villa Alba",
+  twin: "Camera con due letti singoli di Villa Alba",
+  bathrooms: "Bagno di Villa Alba",
+  cucina: "Cucina di Villa Alba",
+  sala_da_pranzo: "Sala da pranzo di Villa Alba",
+  soggiorno: "Soggiorno di Villa Alba",
+  piscina: "Piscina di Villa Alba",
+  esterno: "Giardino esterno di Villa Alba",
+  territorio: "Il territorio della Franciacorta",
+  gallery: "Villa Alba, Franciacorta",
+  vini: "Vino della Franciacorta",
+  cantine: "Cantina della Franciacorta",
+};
+
 /**
  * Ritorna le immagini di una sezione dal database (ordinate per sort_order).
  * Se Supabase non è configurato o la sezione non ha ancora immagini caricate
@@ -32,7 +53,7 @@ export async function getSectionImages(section: ImageSection): Promise<ResolvedI
 
   return data.map((row) => ({
     src: row.storage_path,
-    alt: row.alt_text ?? "",
+    alt: row.alt_text?.trim() || SECTION_ALT_FALLBACK[section] || "Villa Alba, Franciacorta",
   }));
 }
 
