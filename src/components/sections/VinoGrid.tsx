@@ -16,7 +16,7 @@ export function VinoGrid({
     new Intl.NumberFormat(currencyLocale, { style: "currency", currency }).format(cents / 100);
 
   return (
-    <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="mt-16 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
       {wines.map((wine, i) => (
         <motion.div
           key={wine.id}
@@ -32,7 +32,7 @@ export function VinoGrid({
                 src={wine.imageSrc}
                 alt={wine.name}
                 fill
-                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
             ) : (
@@ -40,14 +40,14 @@ export function VinoGrid({
                 <Wine size={40} strokeWidth={1.2} className="text-stone" />
               </div>
             )}
-            <span className="font-mono absolute right-3 top-3 rounded-full bg-ink px-3 py-1.5 text-xs text-paper shadow-[var(--shadow-sm)]">
+            <span className="font-mono absolute right-3 top-3 rounded-full bg-ink px-2.5 py-1 text-[11px] text-paper shadow-[var(--shadow-sm)]">
               {formatPrice(wine.priceCents, wine.currency)}
             </span>
           </div>
-          <div className="p-6">
-            <h3 className="font-display text-xl text-ink">{wine.name}</h3>
+          <div className="p-4">
+            <h3 className="font-display text-base text-ink">{wine.name}</h3>
             {wine.description && (
-              <p className="mt-3 text-sm leading-relaxed text-graphite">{wine.description}</p>
+              <p className="mt-2 text-xs leading-relaxed text-graphite">{wine.description}</p>
             )}
           </div>
         </motion.div>

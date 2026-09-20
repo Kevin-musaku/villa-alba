@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 import type { BookingRow } from "@/lib/supabase/types";
 
-const FROM_ADDRESS = "Villa Alba <prenotazioni@villaalbafranciacorta.it>";
+const FROM_ADDRESS = "Villa Alba <prenotazioni@villaalbafranciacorta.com>";
 
 const LABELS: Record<string, { subject: string; greeting: string; details: string; checkIn: string; checkOut: string; guests: string; total: string; contact: string }> = {
   it: {
