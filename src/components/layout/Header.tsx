@@ -48,7 +48,7 @@ export function Header() {
     <header className="fixed top-0 z-50 w-full">
       <div
         aria-hidden
-        className={`absolute inset-0 backdrop-blur-[6px] transition-opacity duration-500 ${
+        className={`pointer-events-none absolute inset-0 backdrop-blur-[6px] transition-opacity duration-500 ${
           scrolled ? "opacity-100" : "opacity-0"
         } bg-white/[0.96] shadow-[0_1px_0_var(--color-line)]`}
       />
@@ -123,7 +123,7 @@ export function Header() {
       </div>
 
       {mobileOpen && (
-        <div className="border-t border-mist/60 bg-paper px-6 py-6 md:hidden">
+        <div className="relative border-t border-mist/60 bg-paper px-6 py-6 md:hidden">
           <nav className="flex flex-col gap-5">
             {NAV_ITEMS.map((item) => (
               <a
