@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { calculateStay } from "@/lib/pricing/calculateStay";
+import { checkRateLimit, getClientIp } from "@/lib/security/rateLimit";
 
 export async function GET(req: NextRequest) {
+  const allowed = await checkRateLimit(`pricing:${getClientIp(req)}`, {
+    max: 60,
+    windowSeconds: 60,
+  });
+  if (!allowed) {
+    return NextResponse.json({ error: "Troppe richieste, riprova tra poco." }, { status: 429 });
+  }
+
   const checkIn = req.nextUrl.searchParams.get("checkIn");
   const checkOut = req.nextUrl.searchParams.get("checkOut");
 

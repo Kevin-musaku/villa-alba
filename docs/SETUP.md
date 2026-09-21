@@ -163,6 +163,10 @@ sincronizzazione molto più frequente (ogni 5 minuti) usando `pg_cron` +
 `pg_net` dentro Supabase — gratuito su ogni piano, nessun servizio esterno.
 Il cron giornaliero di Vercel resta comunque attivo come rete di sicurezza.
 
+**`CRON_SECRET` è obbligatoria**: senza di essa `/api/smoobu/sync` risponde
+sempre `503` (fail-closed) e nessuna sincronizzazione parte, né quella di
+Vercel né quella di pg_cron — la rotta non è più pubblica per definizione.
+
 Passaggi manuali una tantum, da fare dopo il primo deploy:
 
 1. **Genera un secret casuale** (es. `openssl rand -hex 32`) e impostalo

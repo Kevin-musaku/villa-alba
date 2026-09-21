@@ -5,6 +5,12 @@ import type { PricingCalendarRow } from "@/lib/supabase/types";
 
 export type NightPrice = { date: string; priceCents: number };
 
+// Nessuna prenotazione reale di una villa richiede più di qualche mese:
+// blocca i range abnormi (es. decenni) che altrimenti farebbero generare
+// decine di migliaia di notti e altrettante righe di query per richiesta,
+// un'amplificazione a costo zero per chi chiama /api/pricing o /api/checkout.
+export const MAX_STAY_NIGHTS = 90;
+
 export type StayQuote = {
   nights: NightPrice[];
   rentalCents: number;
@@ -37,9 +43,22 @@ export async function calculateStay(
   guestsCount: number
 ): Promise<StayQuote> {
   const settings = await getSiteSettings();
+
+  const checkInDate = new Date(checkIn);
+  const checkOutDate = new Date(checkOut);
+  if (Number.isNaN(checkInDate.getTime()) || Number.isNaN(checkOutDate.getTime())) {
+    throw new Error("Date non valide");
+  }
+  const requestedNights = Math.ceil(
+    (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
+  );
+  if (requestedNights > MAX_STAY_NIGHTS) {
+    throw new Error(`Intervallo di date troppo ampio (massimo ${MAX_STAY_NIGHTS} notti)`);
+  }
+
   const nightsDates = eachDayOfInterval({
-    start: new Date(checkIn),
-    end: subDays(new Date(checkOut), 1),
+    start: checkInDate,
+    end: subDays(checkOutDate, 1),
   }).map((d) => format(d, "yyyy-MM-dd"));
 
   const supabase = getSupabaseServerClient();

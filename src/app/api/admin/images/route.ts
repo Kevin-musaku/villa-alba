@@ -84,7 +84,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ image: data }, { status: 201 });
   } catch (err) {
     console.error("[admin/images] errore upload", err);
-    return NextResponse.json({ error: "Errore durante il caricamento" }, { status: 500 });
+    const message =
+      err instanceof Error && (err.message.includes("consentito") || err.message.includes("grande"))
+        ? err.message
+        : "Errore durante il caricamento";
+    const status = message === "Errore durante il caricamento" ? 500 : 400;
+    return NextResponse.json({ error: message }, { status });
   }
 }
 

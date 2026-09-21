@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { BookingRequestSchema } from "@/lib/validation/schemas";
-import { calculateStay } from "@/lib/pricing/calculateStay";
+import { calculateStay, MAX_STAY_NIGHTS } from "@/lib/pricing/calculateStay";
 import { isRangeAvailable } from "@/lib/availability/getBlockedDates";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { getStripeClient, isStripeConfigured } from "@/lib/stripe/client";
+import { checkRateLimit, getClientIp } from "@/lib/security/rateLimit";
 
 export async function POST(req: NextRequest) {
   const supabase = getSupabaseServerClient();
@@ -12,6 +13,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       { error: "Il sistema di prenotazione non è ancora configurato." },
       { status: 503 }
+    );
+  }
+
+  const allowed = await checkRateLimit(`checkout:${getClientIp(req)}`, {
+    max: 8,
+    windowSeconds: 600,
+  });
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Troppi tentativi di prenotazione. Riprova tra qualche minuto." },
+      { status: 429 }
     );
   }
 
@@ -30,7 +42,12 @@ export async function POST(req: NextRequest) {
 
   const { checkIn, checkOut, guestsCount, guestName, guestEmail, guestPhone, locale } = parsed.data;
 
-  if (new Date(checkOut) <= new Date(checkIn)) {
+  const checkInDate = new Date(checkIn);
+  const checkOutDate = new Date(checkOut);
+  const nightsRequested = Math.ceil(
+    (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
+  );
+  if (checkOutDate <= checkInDate || nightsRequested > MAX_STAY_NIGHTS) {
     return NextResponse.json({ error: "Intervallo di date non valido" }, { status: 400 });
   }
 

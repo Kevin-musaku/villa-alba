@@ -1,19 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
+import { timingSafeEqual } from "node:crypto";
 import { pullAvailability, type PullAvailabilityResult } from "@/lib/smoobu/pullAvailability";
 import { pullRates, type PullRatesResult } from "@/lib/smoobu/pullRates";
 
 /**
- * Se CRON_SECRET è impostata, la richiesta deve portare
- * "Authorization: Bearer <CRON_SECRET>" (Vercel lo aggiunge da solo alle
- * chiamate del proprio cron; pg_cron/pg_net lo aggiungono via header
- * esplicito nella migration). Se CRON_SECRET non è impostata, il
- * comportamento resta quello di prima (nessuna autenticazione) — questa
- * rotta è pubblica per definizione, va invocata da cron esterni.
+ * La richiesta deve portare "Authorization: Bearer <CRON_SECRET>" (Vercel lo
+ * aggiunge da solo alle chiamate del proprio cron; pg_cron/pg_net lo
+ * aggiungono via header esplicito nella migration). Fail-closed: se
+ * CRON_SECRET non è configurata sul deploy, la rotta rifiuta ogni richiesta
+ * invece di restare aperta a chiunque.
  */
 function isAuthorized(req: NextRequest): boolean {
   const secret = process.env.CRON_SECRET;
-  if (!secret) return true;
-  return req.headers.get("authorization") === `Bearer ${secret}`;
+  if (!secret) return false;
+
+  const header = req.headers.get("authorization") ?? "";
+  const expected = `Bearer ${secret}`;
+
+  const headerBuf = Buffer.from(header);
+  const expectedBuf = Buffer.from(expected);
+  if (headerBuf.length !== expectedBuf.length) return false;
+
+  return timingSafeEqual(headerBuf, expectedBuf);
 }
 
 const ERROR_MESSAGES: Record<string, string> = {
@@ -45,12 +53,27 @@ async function handleSync() {
   });
 }
 
+function authGuard(req: NextRequest): NextResponse | null {
+  if (!process.env.CRON_SECRET) {
+    return NextResponse.json(
+      { error: "CRON_SECRET non configurata: sincronizzazione disabilitata." },
+      { status: 503 }
+    );
+  }
+  if (!isAuthorized(req)) {
+    return NextResponse.json({ error: "Non autorizzato" }, { status: 401 });
+  }
+  return null;
+}
+
 export async function GET(req: NextRequest) {
-  if (!isAuthorized(req)) return NextResponse.json({ error: "Non autorizzato" }, { status: 401 });
+  const denied = authGuard(req);
+  if (denied) return denied;
   return handleSync();
 }
 
 export async function POST(req: NextRequest) {
-  if (!isAuthorized(req)) return NextResponse.json({ error: "Non autorizzato" }, { status: 401 });
+  const denied = authGuard(req);
+  if (denied) return denied;
   return handleSync();
 }
