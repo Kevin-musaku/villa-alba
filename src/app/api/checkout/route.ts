@@ -63,6 +63,7 @@ export async function POST(req: NextRequest) {
       rental_cents: quote.rentalCents,
       cleaning_fee_cents: quote.cleaningFeeCents,
       tourist_tax_cents: quote.touristTaxCents,
+      nightly_prices: quote.nights.map((n) => ({ date: n.date, price_cents: n.priceCents })),
       currency: quote.currency,
       status: "pending",
       locale,

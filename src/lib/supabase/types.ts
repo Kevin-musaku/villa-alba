@@ -70,6 +70,7 @@ export type PricingCalendarRow = {
 
 export type BookingStatus = "pending" | "confirmed" | "cancelled" | "refunded";
 export type SmoobuPushStatus = "not_pushed" | "pushed" | "failed";
+export type NightlyPriceEntry = { date: string; price_cents: number };
 
 export type BookingRow = {
   id: string;
@@ -83,6 +84,7 @@ export type BookingRow = {
   rental_cents: number | null;
   cleaning_fee_cents: number | null;
   tourist_tax_cents: number | null;
+  nightly_prices: NightlyPriceEntry[] | null;
   currency: string;
   status: BookingStatus;
   stripe_checkout_session_id: string | null;
