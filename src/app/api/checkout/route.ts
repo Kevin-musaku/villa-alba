@@ -89,6 +89,14 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (insertError || !booking) {
+    // 23P01 = exclusion_violation: il vincolo bookings_no_overlap (migration
+    // 0010) ha rifiutato l'insert perché nel frattempo un'altra richiesta ha
+    // prenotato le stesse date. isRangeAvailable sopra è solo un controllo
+    // "best effort" per un errore rapido — questo è il vero punto in cui la
+    // sovrapposizione viene impedita in modo atomico sotto concorrenza.
+    if (insertError?.code === "23P01") {
+      return NextResponse.json({ error: "Le date selezionate non sono più disponibili" }, { status: 409 });
+    }
     console.error("[checkout] errore creazione prenotazione", insertError?.message);
     return NextResponse.json({ error: "Errore durante la creazione della prenotazione" }, { status: 500 });
   }
