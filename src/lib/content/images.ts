@@ -58,14 +58,30 @@ export async function getSectionImages(section: ImageSection): Promise<ResolvedI
 }
 
 export async function getGalleryImages() {
-  const dbImages = await getSectionImages("gallery");
-  if (dbImages) {
-    return dbImages.map((image, i) => ({
-      category: galleryImages[i % galleryImages.length]?.category ?? "villa",
-      image,
-    }));
+  const supabase = getSupabaseServerClient();
+  if (!supabase) return galleryImages;
+
+  const { data, error } = await supabase
+    .from("images")
+    .select("storage_path, alt_text, gallery_category")
+    .eq("section", "gallery")
+    .order("sort_order", { ascending: true });
+
+  if (error || !data || data.length === 0) {
+    if (error) console.error("[content/images] errore lettura galleria", error.message);
+    return galleryImages;
   }
-  return galleryImages;
+
+  // La categoria è scelta dall'admin al caricamento (vedi migration 0011);
+  // le eventuali righe precedenti a quella migration non ce l'hanno ancora,
+  // quindi cadono su "villa" come default ragionevole.
+  return data.map((row) => ({
+    category: row.gallery_category ?? "villa",
+    image: {
+      src: row.storage_path,
+      alt: row.alt_text?.trim() || SECTION_ALT_FALLBACK.gallery,
+    },
+  }));
 }
 
 export async function getHeroImage(): Promise<PlaceholderImage> {

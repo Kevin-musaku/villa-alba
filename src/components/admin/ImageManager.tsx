@@ -19,13 +19,23 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { Trash2, GripVertical, Upload } from "lucide-react";
 
+type GalleryCategory = "villa" | "vigneti" | "lago" | "cantine";
+
 type ImageRow = {
   id: string;
   section: string;
   storage_path: string;
   alt_text: string | null;
   sort_order: number;
+  gallery_category: GalleryCategory | null;
 };
+
+const GALLERY_CATEGORIES: { key: GalleryCategory; label: string }[] = [
+  { key: "villa", label: "La Villa" },
+  { key: "vigneti", label: "I Vigneti" },
+  { key: "lago", label: "Il Lago" },
+  { key: "cantine", label: "Le Cantine" },
+];
 
 const SECTION_GROUPS: { group: string; sections: { key: string; label: string }[] }[] = [
   { group: "Generale", sections: [{ key: "hero", label: "Home / Hero" }] },
@@ -58,7 +68,7 @@ const SECTION_GROUPS: { group: string; sections: { key: string; label: string }[
     group: "Altre sezioni",
     sections: [
       { key: "territorio", label: "Territorio" },
-      { key: "gallery", label: "Galleria" },
+      { key: "gallery", label: "Galleria Home (Villa, Vigneti, Lago, Cantine)" },
       { key: "vini", label: "Vini (foto etichette)" },
       { key: "cantine", label: "Cantine (galleria)" },
     ],
@@ -73,6 +83,7 @@ export function ImageManager() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploadCategory, setUploadCategory] = useState<GalleryCategory>("villa");
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -94,6 +105,7 @@ export function ImageManager() {
     const form = new FormData();
     form.append("file", file);
     form.append("section", section);
+    if (section === "gallery") form.append("galleryCategory", uploadCategory);
 
     try {
       const res = await fetch("/api/admin/images", { method: "POST", body: form });
@@ -119,6 +131,22 @@ export function ImageManager() {
       setImages(previous);
       const data = await res.json().catch(() => null);
       setError(data?.error ?? "Impossibile eliminare l'immagine.");
+    }
+  }
+
+  async function handleCategoryChange(id: string, galleryCategory: GalleryCategory) {
+    const previous = images;
+    setImages((prev) => prev.map((img) => (img.id === id ? { ...img, gallery_category: galleryCategory } : img)));
+
+    const res = await fetch("/api/admin/images", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, galleryCategory }),
+    });
+    if (!res.ok) {
+      setImages(previous);
+      const data = await res.json().catch(() => null);
+      setError(data?.error ?? "Impossibile aggiornare la categoria.");
     }
   }
 
@@ -161,6 +189,25 @@ export function ImageManager() {
         ))}
       </div>
 
+      {section === "gallery" && (
+        <div className="mt-6">
+          <label className="block text-[10px] uppercase tracking-[0.15em] text-stone">
+            Categoria della foto da caricare
+          </label>
+          <select
+            value={uploadCategory}
+            onChange={(e) => setUploadCategory(e.target.value as GalleryCategory)}
+            className="mt-1.5 border border-mist bg-white px-3 py-2 text-sm text-charcoal"
+          >
+            {GALLERY_CATEGORIES.map((c) => (
+              <option key={c.key} value={c.key}>
+                {c.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       <label className="mt-6 flex w-fit cursor-pointer items-center gap-2 border border-ink px-4 py-2 text-xs uppercase tracking-[0.1em] text-ink hover:bg-ink hover:text-paper">
         <Upload size={14} />
         {uploading ? "Caricamento..." : "Carica immagine"}
@@ -182,7 +229,12 @@ export function ImageManager() {
           <SortableContext items={images.map((i) => i.id)} strategy={rectSortingStrategy}>
             <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
               {images.map((img) => (
-                <SortableImage key={img.id} image={img} onDelete={handleDelete} />
+                <SortableImage
+                  key={img.id}
+                  image={img}
+                  onDelete={handleDelete}
+                  onCategoryChange={section === "gallery" ? handleCategoryChange : undefined}
+                />
               ))}
             </div>
           </SortableContext>
@@ -192,7 +244,15 @@ export function ImageManager() {
   );
 }
 
-function SortableImage({ image, onDelete }: { image: ImageRow; onDelete: (id: string) => void }) {
+function SortableImage({
+  image,
+  onDelete,
+  onCategoryChange,
+}: {
+  image: ImageRow;
+  onDelete: (id: string) => void;
+  onCategoryChange?: (id: string, category: GalleryCategory) => void;
+}) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: image.id });
 
   return (
@@ -210,6 +270,20 @@ function SortableImage({ image, onDelete }: { image: ImageRow; onDelete: (id: st
           <Trash2 size={16} />
         </button>
       </div>
+      {onCategoryChange && (
+        <select
+          value={image.gallery_category ?? "villa"}
+          onChange={(e) => onCategoryChange(image.id, e.target.value as GalleryCategory)}
+          onPointerDown={(e) => e.stopPropagation()}
+          className="absolute inset-x-1 bottom-1 border border-ink/20 bg-paper/95 px-1.5 py-1 text-[10px] uppercase tracking-[0.08em] text-charcoal"
+        >
+          {GALLERY_CATEGORIES.map((c) => (
+            <option key={c.key} value={c.key}>
+              {c.label}
+            </option>
+          ))}
+        </select>
+      )}
     </div>
   );
 }

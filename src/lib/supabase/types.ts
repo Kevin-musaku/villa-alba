@@ -15,12 +15,15 @@ export type ImageSection =
   | "vini"
   | "cantine";
 
+export type GalleryCategory = "villa" | "vigneti" | "lago" | "cantine";
+
 export type ImageRow = {
   id: string;
   section: ImageSection;
   storage_path: string;
   alt_text: string | null;
   sort_order: number;
+  gallery_category: GalleryCategory | null;
   created_at: string;
 };
 

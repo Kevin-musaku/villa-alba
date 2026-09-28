@@ -62,3 +62,10 @@ export const ImageInputSchema = z.object({
 export const ReorderInputSchema = z.object({
   ids: z.array(z.string().uuid()).min(1),
 });
+
+export const GalleryCategoryEnum = z.enum(["villa", "vigneti", "lago", "cantine"]);
+
+export const GalleryCategoryUpdateSchema = z.object({
+  id: z.string().uuid(),
+  galleryCategory: GalleryCategoryEnum,
+});

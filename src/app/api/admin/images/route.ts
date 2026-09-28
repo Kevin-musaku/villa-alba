@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdminSession } from "@/lib/auth/session";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { uploadSiteImage, deleteSiteImage } from "@/lib/supabase/storage";
-import { ReorderInputSchema } from "@/lib/validation/schemas";
+import { ReorderInputSchema, GalleryCategoryUpdateSchema, GalleryCategoryEnum } from "@/lib/validation/schemas";
 import type { ImageSection } from "@/lib/supabase/types";
 
 const SECTIONS: ImageSection[] = [
@@ -55,9 +55,23 @@ export async function POST(req: NextRequest) {
   const file = form.get("file");
   const section = form.get("section");
   const altText = form.get("altText");
+  const galleryCategoryRaw = form.get("galleryCategory");
 
   if (!(file instanceof File) || typeof section !== "string" || !SECTIONS.includes(section as ImageSection)) {
     return NextResponse.json({ error: "Dati mancanti o non validi" }, { status: 400 });
+  }
+
+  // La categoria (villa/vigneti/lago/cantine) è obbligatoria solo per la
+  // sezione "gallery": è l'etichetta mostrata sotto la foto in home, quindi
+  // senza una scelta esplicita dell'admin la foto finirebbe senza etichetta
+  // corretta sul sito.
+  let galleryCategory: string | null = null;
+  if (section === "gallery") {
+    const parsedCategory = GalleryCategoryEnum.safeParse(galleryCategoryRaw);
+    if (!parsedCategory.success) {
+      return NextResponse.json({ error: "Categoria della foto mancante o non valida" }, { status: 400 });
+    }
+    galleryCategory = parsedCategory.data;
   }
 
   try {
@@ -75,6 +89,7 @@ export async function POST(req: NextRequest) {
         storage_path: publicUrl,
         alt_text: typeof altText === "string" ? altText : null,
         sort_order: count ?? 0,
+        gallery_category: galleryCategory,
       })
       .select()
       .single();
@@ -123,7 +138,25 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Supabase non configurato" }, { status: 503 });
   }
 
-  const parsed = ReorderInputSchema.safeParse(await req.json());
+  const body = await req.json().catch(() => null);
+
+  // Due usi distinti sulla stessa rotta PATCH: riordino (drag&drop, {ids})
+  // oppure cambio categoria di una singola foto della galleria ({id,
+  // galleryCategory}) — distinti dalla forma del payload.
+  const categoryUpdate = GalleryCategoryUpdateSchema.safeParse(body);
+  if (categoryUpdate.success) {
+    const { error } = await supabase
+      .from("images")
+      .update({ gallery_category: categoryUpdate.data.galleryCategory })
+      .eq("id", categoryUpdate.data.id)
+      .eq("section", "gallery");
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    revalidatePath("/[locale]", "layout");
+    return NextResponse.json({ ok: true });
+  }
+
+  const parsed = ReorderInputSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: "Dati non validi" }, { status: 400 });
   }
