@@ -23,6 +23,16 @@ function toIso(d: Date) {
   return format(d, "yyyy-MM-dd");
 }
 
+// "yyyy-MM-dd" passato a `new Date(...)` viene interpretato come mezzanotte
+// UTC, non mezzanotte locale: per chi visita da un fuso indietro rispetto a
+// UTC (es. Americhe) la data risultante cade sul giorno precedente rispetto
+// a quella visualizzata nella griglia (costruita con Date locali). Va
+// sempre parsata come data locale per restare coerente con `toIso`.
+function fromIso(iso: string): Date {
+  const [year, month, day] = iso.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
 export function BookingCalendar({
   blockedDates,
   range,
@@ -54,13 +64,13 @@ export function BookingCalendar({
     }
 
     // second click: set check-out, unless the user clicked before the current start
-    if (isBefore(day, new Date(range.from))) {
+    if (isBefore(day, fromIso(range.from))) {
       onChange({ from: iso, to: null });
       return;
     }
 
     // reject if any night in the new range is blocked
-    const nights = eachDayOfInterval({ start: new Date(range.from), end: day }).slice(0, -1);
+    const nights = eachDayOfInterval({ start: fromIso(range.from), end: day }).slice(0, -1);
     const hasBlocked = nights.some((n) => blockedDates.has(toIso(n)));
     if (hasBlocked) {
       onChange({ from: iso, to: null });
@@ -131,8 +141,8 @@ function MonthGrid({
   const days = eachDayOfInterval({ start, end });
   const leadingBlanks = (getDay(start) + 6) % 7; // Monday-first grid
 
-  const from = range.from ? new Date(range.from) : null;
-  const to = range.to ? new Date(range.to) : null;
+  const from = range.from ? fromIso(range.from) : null;
+  const to = range.to ? fromIso(range.to) : null;
 
   return (
     <div>
